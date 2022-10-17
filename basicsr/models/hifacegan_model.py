@@ -4,7 +4,6 @@ from os import path as osp
 from tqdm import tqdm
 
 from basicsr.archs import build_network
-from basicsr.losses import build_loss
 from basicsr.metrics import calculate_metric
 from basicsr.utils import imwrite, tensor2img
 from basicsr.utils.registry import MODEL_REGISTRY

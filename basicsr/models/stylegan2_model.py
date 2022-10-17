@@ -7,7 +7,6 @@ from collections import OrderedDict
 from os import path as osp
 
 from basicsr.archs import build_network
-from basicsr.losses import build_loss
 from basicsr.losses.gan_loss import g_path_regularize, r1_penalty
 from basicsr.utils import imwrite, tensor2img
 from basicsr.utils.registry import MODEL_REGISTRY

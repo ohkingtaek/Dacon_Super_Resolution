@@ -1,0 +1,87 @@
+# ------------------------------------------------------------------------
+# Copyright (c) 2022 Woon-Ha Yeo <woonhahaha@gmail.com>.
+# Copyright (c) 2022 Wang-Taek Oh <mm0741@naver.com>.
+# ------------------------------------------------------------------------
+# Modified from BasicSR (https://github.com/xinntao/BasicSR)
+# Copyright 2018-2020 BasicSR Authors
+# ------------------------------------------------------------------------
+# general settings
+name: EnsembleNet-nb3
+model_type: SwinIRModel
+scale: 1
+num_gpu: 4
+manual_seed: 36
+
+datasets:
+  train:
+    name: dacon
+    type: PairedNpyImageDataset
+    dataroot_gt: ./datasets/Dacon/test_ensemble/input
+    dataroot_lq: ./datasets/test_ensemble/input
+    
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+    gt_size: 512
+    use_flip: true
+    use_rot: true
+
+    # data loader
+    use_shuffle: true
+    num_worker_per_gpu: 8
+    batch_size_per_gpu: 4
+    dataset_enlarge_ratio: 1
+    prefetch_mode: ~
+
+network_g:
+  type: EnsembleNet
+  upscale: 4
+  in_chans: 3
+  img_size: 48
+  window_size: 8
+  img_range: 1.
+  depths: [6, 6, 6]
+  embed_dim: 180
+  num_heads: [6, 6, 6]
+  mlp_ratio: 2
+  upsampler: 'pixelshuffle'
+  resi_connection: '1conv'
+
+# path
+path:
+  pretrain_network_g: ~
+  strict_load_g: true
+  resume_state: ~
+
+# training settings
+train:
+  ema_decay: 0.999
+  optim_g:
+    type: AdamW
+    lr: !!float 1e-4
+    weight_decay: 0
+    betas: [0.9, 0.99]
+
+  scheduler:
+    type: TrueCosineAnnealingLR
+    T_max: 200000
+    eta_min: !!float 1e-7
+
+  total_iter: 500000
+  warmup_iter: -1  # no warm up
+
+  # losses
+  pixel_opt:
+    type: PSNRLoss
+    loss_weight: 1
+    reduction: mean
+
+# logging settings
+logger:
+  print_freq: 100
+  save_checkpoint_freq: !!float 5e3
+  use_tb_logger: true
+  wandb:
+    project: 'hat'
+    resume_id: ~

@@ -1,23 +1,23 @@
 # general settings
-name: train_SwinIR_SRx2_scratch_P48W8_DIV2K_500k_B4G8
+name: train_SwinIR_SRx4_Dacon
 model_type: SwinIRModel
-scale: 2
+scale: 4
 num_gpu: auto
-manual_seed: 0
+manual_seed: 36
 
 # dataset and data loader settings
 datasets:
   train:
-    name: DIV2K
+    name: Dacon
     type: PairedImageDataset
-    dataroot_gt: datasets/DF2K/DIV2K_train_HR_sub
-    dataroot_lq: datasets/DF2K/DIV2K_train_LR_bicubic_X2_sub
-    meta_info_file: basicsr/data/meta_info/meta_info_DIV2K800sub_GT.txt
+    dataroot_gt: datasets/train/hr.lmdb
+    dataroot_lq: datasets/train/lr.lmdb
+    meta_info_file: none
     filename_tmpl: '{}'
     io_backend:
-      type: disk
+      type: lmdb
 
-    gt_size: 96
+    gt_size: 512
     use_hflip: true
     use_rot: true
 
@@ -27,18 +27,11 @@ datasets:
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
 
-  val:
-    name: Set5
-    type: PairedImageDataset
-    dataroot_gt: datasets/Set5/GTmod12
-    dataroot_lq: datasets/Set5/LRbicx2
-    io_backend:
-      type: disk
 
 # network structures
 network_g:
   type: SwinIR
-  upscale: 2
+  upscale: 4
   in_chans: 3
   img_size: 48
   window_size: 8
@@ -66,9 +59,9 @@ train:
     betas: [0.9, 0.99]
 
   scheduler:
-    type: MultiStepLR
-    milestones: [250000, 400000, 450000, 475000]
-    gamma: 0.5
+    type: TrueCosineAnnealingLR
+    T_max: 200000
+    eta_min: !!float 1e-7
 
   total_iter: 500000
   warmup_iter: -1  # no warm up
@@ -79,16 +72,6 @@ train:
     loss_weight: 1.0
     reduction: mean
 
-# validation settings
-val:
-  val_freq: !!float 5e3
-  save_img: false
-
-  metrics:
-    psnr: # metric name, can be arbitrary
-      type: calculate_psnr
-      crop_border: 2
-      test_y_channel: false
 
 # logging settings
 logger:
